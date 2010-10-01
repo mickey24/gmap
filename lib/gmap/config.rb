@@ -6,6 +6,8 @@ module Gmap
   module Config
     extend self
 
+    class ConfigNotFoundError < StandardError; end
+
     def load
       config_file_name = ".gmap"
 
@@ -19,6 +21,8 @@ module Gmap
         # load $HOME/.gmap
         home_dir = File.expand_path("~")
         config_path = "#{home_dir}/#{config_file_name}"
+        raise ConfigNotFoundError unless File.exists?(config_path)
+
         YAML.load_file(config_path)
       end
     end
