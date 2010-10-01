@@ -32,7 +32,7 @@ project_config:
 EOM
     }
 
-    describe ".load_config" do
+    describe ".load" do
       context "when current directory has .gmap" do
         it "should load config from .gmap of current directory" do
           current_dir = "/path/to/current_dir"
@@ -42,7 +42,7 @@ EOM
           File.should_receive(:exists?).with(config_path).and_return(true)
           YAML.should_receive(:load_file).with(config_path).and_return(sample_config)
 
-          Config.load_config.should == sample_config
+          Config.load.should == sample_config
         end
       end
 
@@ -57,7 +57,7 @@ EOM
           File.should_receive(:expand_path).with("~").and_return(home_dir)
           YAML.should_receive(:load_file).with("#{home_dir}/.gmap").and_return(sample_config)
 
-          Config.load_config.should == sample_config
+          Config.load.should == sample_config
         end
       end
     end

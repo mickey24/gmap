@@ -6,7 +6,7 @@ module Gmap
   module Config
     extend self
 
-    def load_config
+    def load
       config_file_name = ".gmap"
 
       current_dir = Dir.getwd

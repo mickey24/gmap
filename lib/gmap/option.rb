@@ -8,7 +8,7 @@ module Gmap
 
     class InvalidOptionError < StandardError; end
 
-    def parse_option(argv)
+    def parse(argv)
       argv = argv.dup
       opts = {}
 
@@ -65,7 +65,7 @@ module Gmap
 
       begin
         parser.parse!(argv)
-      rescue OptionParser::InvalidOption, OptionParser::InvalidArgument
+      rescue OptionParser::InvalidOption, OptionParser::InvalidArgument, OptionParser::MissingArgument
         raise InvalidOptionError, $!.to_s
       end
 
