@@ -25,5 +25,14 @@ module Gmap
         end
       }.flatten
     end
+
+    def get_srp_name(path)
+      # extract SRPxxxx from the absolute path
+      if %r!/(SRP\d+)(?:/|\Z)! =~ File.expand_path(path)
+        $1
+      else
+        nil
+      end
+    end
   end
 end

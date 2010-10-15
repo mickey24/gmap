@@ -65,5 +65,23 @@ module Gmap
         end
       end
     end
+
+    describe ".get_srp_name" do
+      context "with a path including SRPxxxx" do
+        it "should return 'SRPxxxx'" do
+          File.should_receive(:expand_path).and_return("/path/to/SRP000123/SRX000456/SRR000789.fastq")
+
+          Utility.get_srp_name("./SRR000789.fastq").should == "SRP000123"
+        end
+      end
+
+      context "with a path without SRPxxxx" do
+        it "should return nil" do
+          File.should_receive(:expand_path).and_return("/path/to/SRR000789.fastq")
+
+          Utility.get_srp_name("./SRR000789.fastq").should be_nil
+        end
+      end
+    end
   end
 end
