@@ -9,6 +9,7 @@ qsub_path      : /path/to/qsub
 tophat_path    : /path/to/tophat
 bowtie_path    : /path/to/bowtie
 soap2_path     : /path/to/soap2
+samtools_path  : /path/to/samtools
 
 jobname_prefix : m
 queue          : node.q

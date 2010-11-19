@@ -28,10 +28,17 @@ module Gmap
       raise InvalidConfigError, "invalid tool name: #{tool}" unless ["tophat", "bowtie", "soap2"].include?(tool)
 
       # check tool path
-      tool_path_key = "#{tool}_path"
-      tool_path = config[tool_path_key]
-      raise InvalidConfigError, "config not found: #{tool_path_key}" unless tool_path
-      raise InvalidConfigError, "invalid path: #{tool_path_key}: #{tool_path}" unless File.executable?(tool_path)
+      required_tools = {
+        "tophat" => ["tophat", "bowtie", "samtools"],
+        "bowtie" => ["bowtie"],
+        "soap2"  => ["soap2"],
+      }
+      required_tools[tool].each do |required_tool|
+        tool_path_key = "#{required_tool}_path"
+        tool_path = config[tool_path_key]
+        raise InvalidConfigError, "config not found: #{tool_path_key}" unless tool_path
+        raise InvalidConfigError, "invalid path: #{tool_path_key}: #{tool_path}" unless File.executable?(tool_path)
+      end
 
       # check other configs
       [ "jobname_prefix",

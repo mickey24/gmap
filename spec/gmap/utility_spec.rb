@@ -65,30 +65,39 @@ module Gmap
         "soap2",
       ].each do |tool|
         context "when tool == #{tool}" do
-          tool_path_key = "#{tool}_path"
-          context "and without #{tool_path_key} key" do
-            it {
-              invalid_config = sample_config
-              invalid_config["tool"] = tool
-              invalid_config = invalid_config.reject{|k, v| k == tool_path_key}
 
-              lambda {
-                Utility.validate_config(invalid_config)
-              }.should raise_error(Utility::InvalidConfigError, "config not found: #{tool_path_key}")
-            }
-          end
+          required_tools = {
+            "tophat" => ["tophat", "bowtie", "samtools"],
+            "bowtie" => ["bowtie"],
+            "soap2"  => ["soap2"],
+          }
 
-          context "and #{tool_path_key} is invalid" do
-            it "should raise error #{Utility::InvalidConfigError} with 'invalid path: #{tool_path_key}: \#{tool_path}'" do
-              invalid_config = sample_config
-              invalid_config["tool"] = tool
-              tool_path = invalid_config[tool_path_key]
+          required_tools[tool].each do |required_tool|
+            tool_path_key = "#{required_tool}_path"
+            context "and without #{tool_path_key} key" do
+              it {
+                invalid_config = sample_config
+                invalid_config["tool"] = tool
+                invalid_config = invalid_config.reject{|k, v| k == tool_path_key}
 
-              File.should_receive(:executable?).with(tool_path).and_return(false)
+                lambda {
+                  Utility.validate_config(invalid_config)
+                }.should raise_error(Utility::InvalidConfigError, "config not found: #{tool_path_key}")
+              }
+            end
 
-              lambda {
-                Utility.validate_config(invalid_config)
-              }.should raise_error(Utility::InvalidConfigError, "invalid path: #{tool_path_key}: #{tool_path}")
+            context "and #{tool_path_key} is invalid" do
+              it "should raise error #{Utility::InvalidConfigError} with 'invalid path: #{tool_path_key}: \#{tool_path}'" do
+                invalid_config = sample_config
+                invalid_config["tool"] = tool
+                tool_path = invalid_config[tool_path_key]
+
+                File.should_receive(:executable?).with(tool_path).and_return(false)
+
+                lambda {
+                  Utility.validate_config(invalid_config)
+                }.should raise_error(Utility::InvalidConfigError, "invalid path: #{tool_path_key}: #{tool_path}")
+              end
             end
           end
         end
