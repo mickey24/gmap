@@ -11,8 +11,7 @@ module Gmap
     end
 
     def run_core(config)
-      dry_run = config["dry_run"]
-      log.info("dry run mode")
+      log.formatter = lambda {|a,b,c,d| "#{d}\n"}
 
       tool = config["tool"]
       log.info("tool name: #{tool}")
@@ -27,6 +26,7 @@ module Gmap
       genome_index         = config["genome_index"]
       genome_config        = config["genome_config"]
       target_genome_config = genome_config[genome_index]
+      log.info("genome index: #{genome_index}")
 
       project_config = config["project_config"]
 
@@ -38,7 +38,15 @@ module Gmap
         input_file2 = Utility.get_mate_pair_file_name(input_file1)
         log.info("mate pair: #{input_file2}") if input_file2
 
-        srp         = Utility.get_srp_name(input_file1)
+        # output directories
+        output_dir = "#{Utility.get_output_dir(config, input_file1)}/#{tool}"
+        log.info("output dir: #{output_dir}")
+
+        qsub_log_dir = "#{output_dir}/qsub_logs"
+        log.debug("qsub log dir: #{qsub_log_dir}")
+
+        # project config
+        srp = Utility.get_srp_name(input_file1)
         tool_config = srp && project_config[srp] && project_config[srp][tool]
         if tool_config
           log.info("project config: #{srp}") if srp
@@ -47,18 +55,10 @@ module Gmap
           tool_config = project_config["default"][tool]
         end
 
-        # create output directories
-        output_dir = "#{Utility.get_output_dir(config, input_file1)}/#{tool}"
-        log.debug("output dir: #{output_dir}")
+        # qsub commands to be executed
+        qsub_cmds = []
 
-        qsub_log_dir = "#{output_dir}/qsub_logs"
-        log.debug("qsub log dir: #{qsub_log_dir}")
-
-        if !dry_run
-          Utility.create_directories(qsub_log_dir)
-        end 
-
-        # for each chrnum
+        # for each chrnum, print log messages and generate qsub command strings
         chrnum = Utility.parse_chrnum(config['chrnum'] || target_genome_config['chrnum'])
         log.info("chrnum: #{chrnum.join(",")}")
         chrnum.each do |num|
@@ -75,12 +75,34 @@ module Gmap
           qsub_opts = "-N #{jobname_prefix}#{tool_prefix}_#{num} -b y -cwd -q #{queue} -l nc=#{threads} -j y -o #{qsub_log_dir}/#{num}"
           qsub_cmd = "#{qsub_path} #{qsub_opts} #{runner_cmd}"
 
-          # submit a job by qsub
-          log.debug(qsub_cmd)
-          if !dry_run
-            system qsub_cmd
-          end 
+          log.debug("qsub command: #{qsub_cmd}")
+          qsub_cmds.push(qsub_cmd)
         end
+
+        # yes/no
+        ans = ""
+        dry_run = nil
+        puts "submit jobs? (y/n)"
+
+        while (dry_run.nil?)
+          ans = $stdin.gets.chomp!.downcase
+          if ["y", "yes", "n", "no"].include?(ans)
+            dry_run = ["n", "no"].include?(ans)
+          else
+            puts "please answer 'y' or 'n'"
+          end
+        end
+
+        if !dry_run
+          # create output directories
+          Utility.create_directories(qsub_log_dir)
+
+          # submit a job by qsub
+          qsub_cmds.each do |cmd|
+            system cmd
+          end
+        end
+
       end
     end
   end
