@@ -13,13 +13,6 @@ module Gmap
         end
       end
 
-      # dry_run
-      context "with -d" do
-        it "should return {'dry_run' => true}" do
-          Option.parse(%w|-d|).should include_hash({"dry_run" => true})
-        end
-      end
-
       # genome_index
       context "with -g genome_index" do
         it "should return {'genome_index' => genome_index}" do

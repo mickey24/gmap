@@ -16,11 +16,6 @@ module Gmap
       parser = OptionParser.new do |parser|
         parser.banner = "usage: #{$0} [options] input_file(s)"
 
-        # dry_run
-        parser.on("-d", "[optional] show what commands would have been executed.") do
-          opts["dry_run"] = true
-        end
-
         # genome_index
         parser.on("-g GENOME_INDEX", String,
           "[required] the genome index name to be searched.") do |v|
