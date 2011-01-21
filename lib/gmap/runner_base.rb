@@ -18,6 +18,11 @@ module Gmap
       config = Utility.get_config(argv)
       log.debug("config : #{config}")
 
+      if config["help"]
+        puts config["help"]
+        exit 0
+      end
+
       log.debug("check config validity")
       begin
         # validate config
