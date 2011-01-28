@@ -94,11 +94,12 @@ module Gmap
       config["input_files"].each do |input_file|
         srp = get_srp_name(input_file)
 
-        target_project_config = (srp && project_config[srp]) || project_config["default"]
-        raise InvalidConfigError, "config not found: #{srp} and default in project_config" unless target_project_config
+        target_project_name = (srp && project_config[srp]) ? srp : "default"
+        target_project_config = project_config[target_project_name]
+        raise InvalidConfigError, "config not found: #{srp} and default settings in project_config" unless target_project_config
 
-        target_tool_config = (srp && project_config[srp] && project_config[srp][tool]) || (project_config["default"] && project_config["default"][tool])
-        raise InvalidConfigError, "config not found: #{tool} in project_config[#{srp}] and project_config[default]" unless target_tool_config
+        target_tool_config = target_project_config[tool]
+        raise InvalidConfigError, "config not found: #{tool} in project_config[#{target_project_name}]" unless target_tool_config
       end
 
       true

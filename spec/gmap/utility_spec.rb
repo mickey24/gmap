@@ -207,16 +207,43 @@ module Gmap
       end
 
       context "with project_config key" do
-        context "and without the specified project config" do
-          it "should raise #{Utility::InvalidConfigError} with 'config not found: \#{srp} in project_config'" do
-            pending
-          end
+        context "and without the specified project config and default project_config" do
+          it {
+            invalid_config = sample_config
+            srp = File.basename(invalid_config["input_files"][0])
+            invalid_config["project_config"] = {}
+
+            lambda {
+              Utility.validate_config(invalid_config)
+            }.should raise_error(Utility::InvalidConfigError, "config not found: #{srp} and default settings in project_config")
+          }
         end
 
         context "and with the specified project config and without tool setting" do
-          it "should raise #{Utility::InvalidConfigError} with 'config not found: \#{tool} in project_config[\#{srp}]'" do
-            pending
-          end
+          it {
+            invalid_config = sample_config
+            srp = File.basename(invalid_config["input_files"][0])
+            tool = invalid_config["tool"]
+            invalid_config["project_config"][srp].reject!{|k, v| k == tool}
+
+            lambda {
+              Utility.validate_config(invalid_config)
+            }.should raise_error(Utility::InvalidConfigError, "config not found: #{tool} in project_config[#{srp}]")
+          }
+        end
+
+        context "and with the default project config and without tool setting" do
+          it {
+            invalid_config = sample_config
+            srp = File.basename(invalid_config["input_files"][0])
+            tool = invalid_config["tool"]
+            invalid_config["project_config"].reject!{|k, v| k == srp}
+            invalid_config["project_config"]["default"].reject!{|k, v| k == tool}
+
+            lambda {
+              Utility.validate_config(invalid_config)
+            }.should raise_error(Utility::InvalidConfigError, "config not found: #{tool} in project_config[default]")
+          }
         end
       end
     end
